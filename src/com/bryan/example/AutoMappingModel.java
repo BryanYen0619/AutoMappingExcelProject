@@ -1,3 +1,5 @@
+package com.bryan.example;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -7,6 +9,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JOptionPane;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.io.File;
 
 import jxl.Cell;
@@ -27,17 +37,24 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-public class main {
-	public static void main(String[] arge) {
+public class AutoMappingModel {
+	final long MAX_WORKING_MINUTE = 540; // 60 * 9
+	
+	private String attendancePath;
+	private String leavePath;
+	private String logPath;
+	
+	public AutoMappingModel() {
 		
-		final long MAX_WORKING_MINUTE = 540; // 60 * 9
-		
+	}
+	
+	public void run() {
 		File directory = new File(".");//设定为当前文件夹
 		//System.out.println(directory.getCanonicalPath());//获取标准的路径
 		//System.out.println(directory.getAbsolutePath());//获取绝对路径
 		String path="";
 		try {
-			path = directory.getCanonicalPath()+"/src";
+			path = directory.getCanonicalPath()+"/src/";
 			System.out.println("Project Path : " + path);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -45,34 +62,38 @@ public class main {
 		}	
 		
 		// Excel 出勤紀錄 路徑
-		String attendancePath = path+"/attendance_record.xls";
+//		String attendancePath = path+"/attendance_record.xls";
 		// Excel 分頁名稱
-		String attendanceSheetName = "Table1";	
+		// String attendanceSheetName = "Table1";	
 		
 		// Excel 請假紀錄 路徑
-		String leavePath = path+"/leave_record.xls";
+//		String leavePath = path+"/leave_record.xls";
 		// Excel 分頁名稱
-		String leavePathName = "Table";
+		// String leavePathName = "Table";
 		
 		// Excel Log 路徑
-		String logPath = path+"/log_record.xls";
+//		String logPath = path+"/log_record.xls";
 		// Excel 分頁名稱
 		String logPathName = "Sheet";
 		
 		// Excel 休假日期 路徑
-		String weekdayPath = path+"/107ygov_yfyshop_weekday.xls";
+		String weekdayPath = path+"107ygov_yfyshop_weekday.xls";
 		// Excel 分頁名稱
-		String weekdayPathName = "Sheet";
+		// String weekdayPathName = "Sheet";
+		
+		if (attendancePath == null && leavePath == null) {
+			
+		}
 		
 		try {
 			Workbook workbook = Workbook.getWorkbook(new File(attendancePath));
-			Sheet attendanceSheet = workbook.getSheet(attendanceSheetName);
+			Sheet attendanceSheet = workbook.getSheet(0);
 			
 			Workbook leaveBook = Workbook.getWorkbook(new File(leavePath));
-			Sheet leaveSheet = leaveBook.getSheet(leavePathName);
+			Sheet leaveSheet = leaveBook.getSheet(0);
 			
 			Workbook weekdayBook = Workbook.getWorkbook(new File(weekdayPath));
-			Sheet weekdaySheet = weekdayBook.getSheet(weekdayPathName);
+			Sheet weekdaySheet = weekdayBook.getSheet(0);
 			
 			WritableWorkbook logBook = Workbook.createWorkbook(new File(logPath));
 			WritableSheet logSheet = logBook.createSheet(logPathName, 0);
@@ -461,13 +482,38 @@ public class main {
 			weekdayBook.close();
 			leaveBook.close();
 			workbook.close();
+			
+			Alert alert = new Alert(AlertType.INFORMATION);
+	        alert.setTitle("提示");
+	        alert.setHeaderText("完成");
+	        alert.setContentText("已產出結果!");
+	        alert.showAndWait();
+	        
 		} catch (BiffException e) {
 			e.printStackTrace();
+			
+			Alert alert = new Alert(AlertType.INFORMATION);
+	        alert.setTitle("提示");
+	        alert.setHeaderText("失敗");
+	        alert.setContentText( e.getMessage());
+	        alert.showAndWait();
 		} catch (IOException e) {
 			e.printStackTrace();
+			
+			Alert alert = new Alert(AlertType.INFORMATION);
+	        alert.setTitle("提示");
+	        alert.setHeaderText("失敗");
+	        alert.setContentText( e.getMessage());
+	        alert.showAndWait();
 		} catch (WriteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
+			Alert alert = new Alert(AlertType.INFORMATION);
+	        alert.setTitle("提示");
+	        alert.setHeaderText("失敗");
+	        alert.setContentText( e.getMessage());
+	        alert.showAndWait();
 		}
 	}
 	
@@ -713,5 +759,17 @@ public class main {
 		}
 		
 		return cellFormat;
+	}
+	
+	public void setAttendancePath(String path) {
+		this.attendancePath = path;
+	}
+	
+	public void setLeavePath(String path) {
+		this.leavePath = path;
+	}
+	
+	public void setLogPath(String path) {
+		this.logPath = path;
 	}
 }
