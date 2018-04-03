@@ -78,6 +78,7 @@ public class AutoMappingModel {
 	
 	private boolean isWeekDay = false;
 	private boolean isNoEndWorkingTime = false;
+	private boolean isIncludeNoonTime = false;
 	
 	private Sheet fillAttendanceRecordSheet = null;
 	
@@ -198,9 +199,7 @@ public class AutoMappingModel {
 						// 鎖定最後一筆才顯示加總不足提示
 						boolean isEndPosition = false;
 						if (i == leaveDataModels.size() - 1) {
-							isEndPosition = true;
-							leaveSum += 60; // 加上中午
-							
+							isEndPosition = true;	
 							System.out.println("leave Sum : " + leaveSum);
 						}
 						leaveSum += Float.parseFloat(leaveDataModels.get(i).getCount()) * 60;
@@ -282,7 +281,6 @@ public class AutoMappingModel {
 		endWorkingTime = attendanceSheet.getCell(6, position).getContents();
 		lateTotalTime = attendanceSheet.getCell(7, position).getContents();	// 遲到
 		leaveEarlyTotalTime = attendanceSheet.getCell(8, position).getContents();		// 早退
-//		leaveStatus = attendanceSheet.getCell(9, position).getContents();
 		complexWorkingTime = attendanceSheet.getCell(10, position).getContents();
 		overtimeCategory = attendanceSheet.getCell(11, position).getContents();
 		allowanceCategory = attendanceSheet.getCell(12, position).getContents();
@@ -570,11 +568,12 @@ public class AutoMappingModel {
 			if (startTime != null && endTime != null) {
 				labelLeaveStatus = new Label(12, logPosition, startTime + "-" + endTime);	
 			}
+			
 			labelLeaveCategory = new Label(13, logPosition, leaveCategory);
 			labelLeaveCount = new Label(14, logPosition, leaveCount);
 			if (leaveSum > 0) {
 				if (isWorkingTimeNotEnough) {
-					if (leaveSum < MAX_WORKING_MINUTE) {
+					if (leaveSum < (MAX_WORKING_MINUTE - 60)) {		// 扣掉中午
 						labelLeaveSum = new Label(15, logPosition, String.valueOf(leaveSum / 60),getTotalExcelCellSetting());
 					} else {
 						labelLeaveSum = new Label(15, logPosition, String.valueOf(leaveSum / 60));
@@ -605,6 +604,7 @@ public class AutoMappingModel {
 	
 	
 	private static long getWorkingMinute(String startDateString, String endDateString) {
+		要判斷有沒有跨中午
 		if (!startDateString.equals("") && !endDateString.equals("")) {
 			SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
 			Date beginDate = null;

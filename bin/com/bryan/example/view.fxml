@@ -18,7 +18,7 @@
       </AnchorPane>
       <AnchorPane fx:id="accessRecordLayout" layoutX="20.0" layoutY="15.0" prefHeight="110.0" prefWidth="560.0">
          <children>
-            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="1.0" prefWidth="200.0" text="請拖曳門禁紀錄(xls)至此" />
+            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="1.0" prefWidth="200.0" text="請拖曳 門禁紀錄(.xls) 至此" />
             <Button fx:id="accessRecordSelectButton" layoutX="460.0" layoutY="50.0" mnemonicParsing="false" text="開啟檔案" />
             <TextField fx:id="accessPathTextField" layoutX="14.0" layoutY="50.0" prefHeight="27.0" prefWidth="440.0" promptText="門禁紀錄路徑" />
          </children>
@@ -28,7 +28,7 @@
       </AnchorPane>
       <AnchorPane fx:id="leaveRecordLayout" layoutX="20.0" layoutY="140.0" prefHeight="110.0" prefWidth="560.0">
          <children>
-            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="6.0" prefWidth="200.0" text="請拖曳請假紀錄(xls)至此">
+            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="6.0" prefWidth="200.0" text="請拖曳 請假紀錄(.xls) 至此">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -39,18 +39,14 @@
       </AnchorPane>
       <AnchorPane fx:id="fillAccessRecordLayout" layoutX="20.0" layoutY="265.0" prefHeight="110.0" prefWidth="560.0">
          <children>
-            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="1.0" prefWidth="200.0" text="請拖曳補刷卡紀錄(xls)至此" />
+            <Label alignment="CENTER" layoutX="180.0" layoutY="14.0" prefHeight="1.0" prefWidth="200.0" text="請拖曳 補刷卡紀錄(.xls) 至此" />
             <Button fx:id="fillAccessRecordSelectButton" layoutX="460.0" layoutY="50.0" mnemonicParsing="false" text="開啟檔案" />
             <TextField fx:id="fillAccessRecordPathTextField1" layoutX="14.0" layoutY="50.0" prefHeight="27.0" prefWidth="440.0" promptText="補刷卡紀錄路徑" />
+            <Label layoutX="14.0" layoutY="14.0" text="[選填]" />
          </children>
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
       </AnchorPane>
-      <Label alignment="CENTER" layoutX="20.0" layoutY="256.0" prefHeight="110.0" prefWidth="560.0" text="施工中..." textFill="#e12f2f">
-         <font>
-            <Font size="58.0" />
-         </font>
-      </Label>
    </children>
 </AnchorPane>

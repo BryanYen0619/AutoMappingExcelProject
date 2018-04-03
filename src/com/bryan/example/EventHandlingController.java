@@ -60,6 +60,15 @@ public class EventHandlingController {
 	@FXML
 	private Button leaveRecordSelectButton;
 	
+	@FXML
+	private AnchorPane fillAccessRecordLayout;
+	
+	@FXML
+	private TextField fillAccessRecordTextField;
+	
+	@FXML
+	private Button fillAccessRecordSelectButton;
+	
 	/**
 	 * Initializes the controller class. This method is automatically called
 	 * after the fxml file has been loaded.
@@ -69,6 +78,7 @@ public class EventHandlingController {
 		
 		accessRecordLayout.setStyle("-fx-background-color: #cccccc;");
 		leaveRecordLayout.setStyle("-fx-background-color: #cccccc;");
+		fillAccessRecordLayout.setStyle("-fx-background-color: #cccccc;");
 		
 		final FileChooser fileChooser = new FileChooser();
 		 
@@ -130,8 +140,16 @@ public class EventHandlingController {
 			}
 		});
 		
+		fillAccessRecordSelectButton.setOnAction((event) ->{
+			File selectedFile = fileChooser.showOpenDialog(null);
+			if (selectedFile != null) {
+				fillAccessRecordTextField.setText(selectedFile.getAbsolutePath());
+			}
+		});
+		
 		initAccessRecordLayoutDragEvent();
 		initLeaveRecordLayoutDragEvent();
+		initFillAccessRecordLayoutDragEvent();
 	}
 	
 	private void saveFileRoutine(File file)
@@ -200,6 +218,32 @@ public class EventHandlingController {
 	            if (event.isAccepted()) {  
 	                File file = dragboard.getFiles().get(0); //取得拖入的文件  
 	                leavePathTextField.setText(file.getAbsolutePath());
+	            }  
+	        }  
+	    }); 
+	}
+	
+	private void initFillAccessRecordLayoutDragEvent() {
+		//build drag 
+		fillAccessRecordLayout.setOnDragOver(new EventHandler<DragEvent>() { //node添加拖入文件事件  
+	        public void handle(DragEvent event) {  
+	            Dragboard dragboard = event.getDragboard();   
+	            if (dragboard.hasFiles()) {  
+	                File file = dragboard.getFiles().get(0);  
+	                if (file.getAbsolutePath().endsWith(".xls")) { //用來過濾拖入文件副檔名  
+	                    event.acceptTransferModes(TransferMode.COPY);//接受拖入文件  
+	                }  
+	            }  
+	  
+	        }  
+	    });
+		fillAccessRecordLayout.setOnDragDropped(new EventHandler<DragEvent>() { //拖入後鬆開滑鼠觸發的事件  
+	        public void handle(DragEvent event) {  
+	            // get drag enter file  
+	            Dragboard dragboard = event.getDragboard();  
+	            if (event.isAccepted()) {  
+	                File file = dragboard.getFiles().get(0); //取得拖入的文件  
+	                fillAccessRecordTextField.setText(file.getAbsolutePath());
 	            }  
 	        }  
 	    }); 
