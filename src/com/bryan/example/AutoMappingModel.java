@@ -418,7 +418,6 @@ public class AutoMappingModel {
 		Label labelWorkingMin;
 		Label labelLateTotalTime;
 		Label labelLeaveEarlyTotalTime;
-//		Label labelLeaveStatus;
 		Label labelComplexWorkingTime;
 		Label labelOvertimeCategory;
 		Label labelAllowanceCategory;
@@ -444,12 +443,6 @@ public class AutoMappingModel {
 			labelLateTotalTime = new Label(10, logPosition, lateTotalTime,getWorkingTimeNoEnoughExcelCellSetting(false));
 			labelLeaveEarlyTotalTime = new Label(11, logPosition, leaveEarlyTotalTime,getWorkingTimeNoEnoughExcelCellSetting(false));
 
-//			if (leaveStatus.length() > 11) {
-//				labelLeaveStatus = new Label(12, logPosition, leaveStatus.substring(0, 11),getWorkingTimeNoEnoughExcelCellSetting(false));
-//			} else {
-//				labelLeaveStatus = new Label(12, logPosition, leaveStatus,getWorkingTimeNoEnoughExcelCellSetting(false));
-//			}
-			
 			labelComplexWorkingTime = new Label(16, logPosition, complexWorkingTime,getWorkingTimeNoEnoughExcelCellSetting(false));
 			labelOvertimeCategory = new Label(17, logPosition, overtimeCategory,getWorkingTimeNoEnoughExcelCellSetting(false));
 			labelAllowanceCategory = new Label(18, logPosition, allowanceCategory,getWorkingTimeNoEnoughExcelCellSetting(false));
@@ -476,13 +469,7 @@ public class AutoMappingModel {
 			
 			labelLateTotalTime = new Label(10, logPosition, lateTotalTime);
 			labelLeaveEarlyTotalTime = new Label(11, logPosition, leaveEarlyTotalTime);
-			
-//			if (leaveStatus.length() > 11) {
-//				labelLeaveStatus = new Label(12, logPosition, leaveStatus.substring(0, 11));
-//			} else {
-//				labelLeaveStatus = new Label(12, logPosition, leaveStatus);
-//			}
-			
+
 			labelComplexWorkingTime = new Label(16, logPosition, complexWorkingTime);
 			labelOvertimeCategory = new Label(17, logPosition, overtimeCategory);
 			labelAllowanceCategory = new Label(18, logPosition, allowanceCategory);
@@ -502,7 +489,6 @@ public class AutoMappingModel {
 			logSheet.addCell(labelWorkingHours);
 			logSheet.addCell(labelWorkingMin);
 			logSheet.addCell(labelLeaveEarlyTotalTime); 
-//			logSheet.addCell(labelLeaveStatus); 
 			logSheet.addCell(labelComplexWorkingTime); 
 			logSheet.addCell(labelOvertimeCategory); 
 			logSheet.addCell(labelAllowanceCategory); 
@@ -526,13 +512,17 @@ public class AutoMappingModel {
 		
 		if (isNoEndWorkingTime) {
 			if (isNullData) {
+				labelLeaveStatus = new Label(12, logPosition, "" ,getWorkingTimeNoEnoughExcelCellSetting(false));
 				labelLeaveCategory = new Label(13, logPosition, "",getWorkingTimeNoEnoughExcelCellSetting(false));
 				labelLeaveCount = new Label(14, logPosition, "",getWorkingTimeNoEnoughExcelCellSetting(false));
 				labelLeaveSum = new Label(15, logPosition, "",getWorkingTimeNoEnoughExcelCellSetting(false));
 			} else {
 				if (startTime != null && endTime != null) {
 					labelLeaveStatus = new Label(12, logPosition, startTime + "-" + endTime,getWorkingTimeNoEnoughExcelCellSetting(false));
+				} else {
+					labelLeaveStatus = new Label(12, logPosition, "" ,getWorkingTimeNoEnoughExcelCellSetting(false));
 				}
+				
 				labelLeaveCategory = new Label(13, logPosition, leaveCategory,getWorkingTimeNoEnoughExcelCellSetting(false));
 				labelLeaveCount = new Label(14, logPosition, leaveCount,getWorkingTimeNoEnoughExcelCellSetting(false));
 				if (leaveSum > 0) {
