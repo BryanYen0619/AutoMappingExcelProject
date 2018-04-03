@@ -4,7 +4,6 @@ public class LeaveDataModel {
 	int position;
 	String category;
 	String count;
-	float sum;
 	boolean isNoEndWorkingTime;
 	String startTime;
 	String endTime;
@@ -23,10 +22,6 @@ public class LeaveDataModel {
 	
 	public void setCount(String count) {
 		this.count = count;
-	}
-	
-	public void setLeaveSum(float sum) {
-		this.sum = sum;
 	}
 	
 	public void setStartTime(String startTime) {
@@ -51,10 +46,6 @@ public class LeaveDataModel {
 	
 	public String getCount() {
 		return count;
-	}
-	
-	public float getLeaveSum() {
-		return sum;
 	}
 	
 	public boolean isNoEndWorkingTime() {

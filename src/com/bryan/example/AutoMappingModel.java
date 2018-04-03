@@ -60,7 +60,6 @@ public class AutoMappingModel {
 	private String endWorkingTime;		// YYY-MM-dd HH:mm:ss
 	private String lateTotalTime;
 	private String leaveEarlyTotalTime;
-//	private String leaveStatus;
 	private String complexWorkingTime;
 	private String overtimeCategory;
 	private String allowanceCategory;
@@ -79,6 +78,8 @@ public class AutoMappingModel {
 	
 	private boolean isWeekDay = false;
 	private boolean isNoEndWorkingTime = false;
+	
+	private Sheet fillAttendanceRecordSheet = null;
 	
 	public AutoMappingModel() {
 		
@@ -103,12 +104,10 @@ public class AutoMappingModel {
 			int weekdaySheetSize = weekdaySheet.getRows();	
 //			System.out.println("Weekday Excel Size : " + weekdaySheetSize);		// 共幾筆
 			
-			int fillAttendanceRecordSheetSize = 0;
-			Sheet fillAttendanceRecordSheet = null;
+			Workbook fillAttendanceRecordBook = null;
 			if (fillAttendanceRecordPath != null) {
-				Workbook fillAttendanceRecordBook = Workbook.getWorkbook(new File(fillAttendanceRecordPath));
+				fillAttendanceRecordBook = Workbook.getWorkbook(new File(fillAttendanceRecordPath));
 				fillAttendanceRecordSheet = fillAttendanceRecordBook.getSheet(0);
-				fillAttendanceRecordSheetSize = fillAttendanceRecordSheet.getRows();
 //				System.out.println("Fill Attendance Record Excel Size : " + fillAttendanceRecordSheetSize);		// 共幾筆
 			}
 			
@@ -117,10 +116,6 @@ public class AutoMappingModel {
 	           
 			for (int position = 1; position < attendanceSheetSize; position++) {
 				loadAttendenceDataFromExcel(attendanceSheet, position);		// 讀取門禁資料
-				
-				if (fillAttendanceRecordSheetSize > 0) {	// 讀取補刷卡資料
-//					loadFillAttendenceRecordDataFromExcel(fillAttendanceRecordSheet, position);
-				}
 				
 				if (!startWorkingTime.equals("") && endWorkingTime.length() < 3) {
 					isNoEndWorkingTime = true;
@@ -149,12 +144,9 @@ public class AutoMappingModel {
 				
 				setLogExcelData(logSheet, logPosition, isWeekDay, isNoEndWorkingTime);
 				
-				float leaveSum = workingMinute;
 				List<LeaveDataModel> leaveDataModels = new ArrayList();
 				
 				for (int search = 1; search < leaveSheetSize; search++) {
-					float tempLeaveSum = leaveSum;
-
 					leaveId = leaveSheet.getCell(2, search ).getContents();
 					leaveDate = leaveSheet.getCell(5,search).getContents();
 					
@@ -190,14 +182,10 @@ public class AutoMappingModel {
 //								System.out.println("search "+search+", start time : " + startTime);
 //								System.out.println("search "+search+", end time : " + endTime);
 //								System.out.println("search "+search+", leave minute : " + leaveMinute);
-							
-							leaveSum = tempLeaveSum + 60 +Float.parseFloat(leaveCount) * 60;
-							leaveDataModel.setLeaveSum(leaveSum);
-//								System.out.println("leave Sum : " + leaveSum);
+						
 							leaveDataModels.add(leaveDataModel);
 							
 							setLogExcelData(logSheet, logPosition, isWeekDay, isNoEndWorkingTime);
-							
 							logPosition++;
 							currentCount++;
 						}
@@ -205,16 +193,21 @@ public class AutoMappingModel {
 				}
 
 				if (leaveDataModels.size() > 0) {
+					float leaveSum = workingMinute;
 					for(int i = 0; i < leaveDataModels.size(); i++) {
 						// 鎖定最後一筆才顯示加總不足提示
 						boolean isEndPosition = false;
 						if (i == leaveDataModels.size() - 1) {
 							isEndPosition = true;
+							leaveSum += 60; // 加上中午
+							
+							System.out.println("leave Sum : " + leaveSum);
 						}
+						leaveSum += Float.parseFloat(leaveDataModels.get(i).getCount()) * 60;
 						
 						setLogExcelDataFromLeaveData(logSheet, leaveDataModels.get(i).getPosition(), leaveDataModels.get(i).getStartTime(),
 								leaveDataModels.get(i).getEndTime(),leaveDataModels.get(i).getCategory(),leaveDataModels.get(i).getCount(), 
-								leaveDataModels.get(i).getLeaveSum(), false, leaveDataModels.get(i).isNoEndWorkingTime(), isEndPosition);
+								leaveSum, false, leaveDataModels.get(i).isNoEndWorkingTime(), isEndPosition);
 					}
 				} else {
 					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isNoEndWorkingTime, true);
@@ -228,6 +221,9 @@ public class AutoMappingModel {
 			
 			weekdayBook.close();
 			leaveBook.close();
+			if (fillAttendanceRecordBook != null) {
+				fillAttendanceRecordBook.close();
+			}
 			workbook.close();
 			
 	        showDialog(DIALOG_TITLE_INFO, DIALOG_HEADER_SUCCESS, "已產出結果!");
@@ -292,6 +288,42 @@ public class AutoMappingModel {
 		allowanceCategory = attendanceSheet.getCell(12, position).getContents();
 		bookingRecord = attendanceSheet.getCell(13, position).getContents();
 		workingItem = attendanceSheet.getCell(14, position).getContents();
+	}
+	
+	/**
+	 * 
+	 * 工號
+	 * 姓名
+	 * 組織名稱
+	 * 表單號
+	 * 表單狀態
+	 * 簽核
+	 * 簽核人
+	 * 表單種類
+	 * 簽核順序
+	 * 補刷卡日期
+	 * 補刷卡時間
+	 * 補刷卡原因
+	 * 備註
+	 * 不使用
+	 * 不使用1
+	 * 
+	 * @param fillAttendanceRecordSheet
+	 * @param position
+	 */
+	private void loadFillAttendenceRecordDataFromExcel(Sheet fillAttendanceRecordSheet, WritableSheet logSheet, int logPosition, boolean isNoEndWorkingTime) {
+		int fillAttendanceRecordSheetSize = fillAttendanceRecordSheet.getRows();
+		
+		String fillAttendanceRecordId;
+		String fillAttendanceRecordDate;
+		String fillAttendanceRecordTime;
+		for (int search = 1; search < fillAttendanceRecordSheetSize; search++) {
+			fillAttendanceRecordId = fillAttendanceRecordSheet.getCell(0, search ).getContents();
+			fillAttendanceRecordDate = fillAttendanceRecordSheet.getCell(9, search ).getContents();
+			fillAttendanceRecordTime = fillAttendanceRecordSheet.getCell(10, search ).getContents();
+		
+		
+		}
 	}
 	
 	private void checkSearchEnd(WritableSheet logSheet) {
@@ -436,6 +468,11 @@ public class AutoMappingModel {
 			labelStartWorkingTime = new Label(5, logPosition, fromatDate(startWorkingTime, "HH:mm:ss"),getWorkingTimeNoEnoughExcelCellSetting(true));
 			labelendWorkingTime = new Label(6, logPosition, fromatDate(endWorkingTime, "HH:mm:ss"),getWorkingTimeNoEnoughExcelCellSetting(true));
 			 
+			// 檢查補刷卡紀錄
+//			if (fillAttendanceRecordSheet != null) {
+//				loadFillAttendenceRecordDataFromExcel(fillAttendanceRecordSheet, attendanceId, attendanceDate, logSheet, logPosition, isNoEndWorkingTime);
+//			}
+			
 			labelWorkingMinute = new Label(7, logPosition, String.valueOf(workingMinute),getWorkingTimeNoEnoughExcelCellSetting(true, true));
 			labelWorkingHours = new Label(8, logPosition, workTime.get(0),getWorkingTimeNoEnoughExcelCellSetting(true, true));
 			labelWorkingMin = new Label(9, logPosition, workTime.get(1),getWorkingTimeNoEnoughExcelCellSetting(true, true));
