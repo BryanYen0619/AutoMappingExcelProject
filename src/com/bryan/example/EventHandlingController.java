@@ -28,11 +28,10 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-import jxl.write.Label;
 
 public class EventHandlingController {
 	
-	final String defaultFileName = "log_record.xls";
+	final static String DEFAULT_OUTPUT_FILE_NAME = "AutoMappingExcel_Output.xls";
 	
 	@FXML
 	private Button runButton;
@@ -73,6 +72,8 @@ public class EventHandlingController {
 		
 		final FileChooser fileChooser = new FileChooser();
 		 
+		initDefaultOutputFilePath();
+		
 		// Handle Button event.
 		runButton.setOnAction((event) -> {
 			System.out.println("button event");
@@ -96,11 +97,9 @@ public class EventHandlingController {
 				
 		});
 		
-		initDefaultOutputFilePath();
-		
 		outputPathSelectButton.setOnAction((event) ->{
 			fileChooser.setTitle("儲存產出紀錄");
-			fileChooser.setInitialFileName(defaultFileName);
+			fileChooser.setInitialFileName(DEFAULT_OUTPUT_FILE_NAME);
 			File savedFile = fileChooser.showSaveDialog(null);
 
 			if (savedFile != null) {
@@ -146,7 +145,7 @@ public class EventHandlingController {
 		String path="";
 		try {
 			directory.getCanonicalPath();
-			path = directory.getCanonicalPath() + "/src/" + defaultFileName;
+			path = directory.getCanonicalPath() + "/output/" + DEFAULT_OUTPUT_FILE_NAME;
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
