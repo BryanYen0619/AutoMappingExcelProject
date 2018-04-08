@@ -604,7 +604,7 @@ public class AutoMappingModel {
 	
 	
 	private static long getWorkingMinute(String startDateString, String endDateString) {
-		要判斷有沒有跨中午
+		//要判斷有沒有跨中午
 		if (!startDateString.equals("") && !endDateString.equals("")) {
 			SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
 			Date beginDate = null;

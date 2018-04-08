@@ -20,14 +20,14 @@
 		<mkdir dir="externalLibs" />
 	
 		<copy todir="externalLibs">
-			<fileset dir="/Users/bryan.yen/Documents/workspace/eclipse-workspace/3rd/jexcelapi">
+			<fileset dir="D:\Workspace\EclipseJava\jexcelapi">
 				<filename name="jxl.jar"/>
 			</fileset>
 		</copy>
 	
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="/Users/bryan.yen/Documents/workspace/eclipse-workspace/AutoMappingExcelProject">
+			<fileset dir="D:\Workspace\EclipseJava\AutoMappingExcelProject">
 				<include name="src/**" />
 			</fileset>
 		</copy>
@@ -90,6 +90,7 @@
 		<fx:resources id="appRes">
 			<fx:fileset dir="dist" includes="AutoMappingExcelProject.jar"/>
 			<fx:fileset dir="dist" includes="libs/*"/>
+			<fx:fileset dir="dist" includes="resources/**"/>
 		</fx:resources>
 	
 		<fx:application id="fxApplication"
