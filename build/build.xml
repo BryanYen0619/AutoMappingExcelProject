@@ -90,7 +90,7 @@
 		<fx:resources id="appRes">
 			<fx:fileset dir="dist" includes="AutoMappingExcelProject.jar"/>
 			<fx:fileset dir="dist" includes="libs/*"/>
-			<fx:fileset dir="dist" includes="assets**"/>
+			<fx:fileset dir="dist" includes="src/assets/**"/>
 		</fx:resources>
 	
 		<fx:application id="fxApplication"
@@ -111,7 +111,7 @@
 			<manifest>
 				<attribute name="Implementation-Vendor" value="bryan.yen"/>
 				<attribute name="Implementation-Title" value="AutoMappingExcelProject"/>
-				<attribute name="Implementation-Version" value="1.0.0(2)"/>
+				<attribute name="Implementation-Version" value="1.0.0"/>
 				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>
