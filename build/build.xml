@@ -5,6 +5,7 @@
 			<filelist>
 				<file name="${java.home}\..\lib\ant-javafx.jar"/>
 				<file name="${java.home}\lib\jfxrt.jar"/>
+				<file name="${basedir}"/>
 			</filelist>
 		</path>
 	
@@ -96,6 +97,7 @@
 		<fx:application id="fxApplication"
 			name="AutoMappingExcelProject"
 			mainClass="com.bryan.example.Main"
+			version="1.0.0"
 		/>
 	
 		<mkdir dir="build/classes/META-INF" />
@@ -120,6 +122,7 @@
 		<mkdir dir="deploy" />
 		<!-- Need to use ${basedir} because somehow the ant task is calculating the directory differently -->
 		<fx:deploy
+			verbose="true" 
 			embedJNLP="false"
 			extension="false"
 			includeDT="false"
