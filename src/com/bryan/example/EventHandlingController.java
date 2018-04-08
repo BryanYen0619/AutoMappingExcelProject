@@ -163,7 +163,7 @@ public class EventHandlingController {
 		String path="";
 		try {
 			directory.getCanonicalPath();
-			path = directory.getCanonicalPath() + "/output/" + DEFAULT_OUTPUT_FILE_NAME;
+			path = directory.getCanonicalPath() + "/src/" + DEFAULT_OUTPUT_FILE_NAME;
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
