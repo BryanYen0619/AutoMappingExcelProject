@@ -112,6 +112,8 @@ public class AutoMappingModel {
 //				System.out.println("Fill Attendance Record Excel Size : " + fillAttendanceRecordSheetSize);		// 共幾筆
 			}
 			
+			System.out.println("logPath : " + logPath);
+			
 			WritableWorkbook logBook = Workbook.createWorkbook(new File(logPath));
 			WritableSheet logSheet = initLogExcel(logBook, OUTPUT_LOG_EXCEL_SHEET_NAME);
 	           
@@ -200,7 +202,7 @@ public class AutoMappingModel {
 						boolean isEndPosition = false;
 						if (i == leaveDataModels.size() - 1) {
 							isEndPosition = true;	
-							System.out.println("leave Sum : " + leaveSum);
+//							System.out.println("leave Sum : " + leaveSum);
 						}
 						leaveSum += Float.parseFloat(leaveDataModels.get(i).getCount()) * 60;
 						
