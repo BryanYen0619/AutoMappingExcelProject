@@ -30,6 +30,7 @@ import jxl.format.Border;
 import jxl.format.BorderLineStyle;
 import jxl.format.Colour;
 import jxl.read.biff.BiffException;
+import jxl.write.Formula;
 import jxl.write.Label;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
@@ -74,7 +75,7 @@ public class AutoMappingModel {
 	
 	private long workingMinute = 0;
 	private int logPosition = 1;
-	private int currentCount = 1;
+	private int oldCountPosition = 2;
 	
 	private boolean isWeekDay = false;
 	private boolean isNoEndWorkingTime = false;
@@ -131,8 +132,8 @@ public class AutoMappingModel {
 					currentName = attendanceName;
 				}
 				
-				checkSearchEnd(logSheet);
-
+				checkSearchEnd(logSheet,oldCountPosition);
+				
 				// 檢查是否在假日
 				String weekday;
 				isWeekDay = false;
@@ -190,7 +191,6 @@ public class AutoMappingModel {
 							
 							setLogExcelData(logSheet, logPosition, isWeekDay, isNoEndWorkingTime);
 							logPosition++;
-							currentCount++;
 						}
 					}
 				}
@@ -213,10 +213,12 @@ public class AutoMappingModel {
 				} else {
 					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isNoEndWorkingTime, true, isWeekDay);
 					logPosition++;
-					currentCount++;
 				}
 			}
 
+			// 補上最後一個計數
+			checkSearchEnd(logSheet, currentName, oldCountPosition, logPosition);
+			
 			logBook.write();
 			logBook.close();
 			
@@ -326,13 +328,35 @@ public class AutoMappingModel {
 		}
 	}
 	
-	private void checkSearchEnd(WritableSheet logSheet) {
+	private void checkSearchEnd(WritableSheet logSheet, String currentName, int oldPosition, int endPosition) {
+		System.out.println("end current name : " + currentName);
+		System.out.println("end current count begin : " + oldPosition);
+		System.out.println("end current count end : " + endPosition);
+
+		Label labelEndName = new Label(3, endPosition, currentName + " 計數", getEndInfoExcelCellSetting());
+		String excel = "COUNTA(D"+String.valueOf(oldPosition) + ":" + "D"+String.valueOf(endPosition) +")";
+		Formula labelEndCount = new Formula(20, endPosition, excel, getDateExcelCellSetting());
+	
+		try {
+			logSheet.addCell(labelEndName);
+			logSheet.addCell(labelEndCount); 
+		} catch (RowsExceededException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WriteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	private void checkSearchEnd(WritableSheet logSheet, int oldPosition) {
 		if (!currentId.equals(attendanceId)) {
-//			System.out.println("get currentName : " + currentName);
-//			System.out.println("get current : " + currentCount  - 1);
-			
+//			System.out.println("current count begin : " + oldPosition);
+//			System.out.println("current count end : " + logPosition);
+
 			Label labelEndName = new Label(3, logPosition, currentName + " 計數", getEndInfoExcelCellSetting());
-			Label labelEndCount = new Label(20, logPosition, String.valueOf(currentCount - 1), getDateExcelCellSetting());
+			String excel = "COUNTA(D"+String.valueOf(oldPosition) + ":" + "D"+String.valueOf(logPosition) +")";
+			Formula labelEndCount = new Formula(20, logPosition, excel, getDateExcelCellSetting());
 			
 			logPosition++;
 			
@@ -349,8 +373,9 @@ public class AutoMappingModel {
 			
 			currentId = attendanceId;
 			currentName = attendanceName;
-			currentCount = 1;
 			isNoEndWorkingTime = false;
+			
+			oldCountPosition = logPosition + 1;
 		}
 	}
 	
