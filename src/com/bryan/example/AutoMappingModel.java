@@ -208,10 +208,10 @@ public class AutoMappingModel {
 						
 						setLogExcelDataFromLeaveData(logSheet, leaveDataModels.get(i).getPosition(), leaveDataModels.get(i).getStartTime(),
 								leaveDataModels.get(i).getEndTime(),leaveDataModels.get(i).getCategory(),leaveDataModels.get(i).getCount(), 
-								leaveSum, false, leaveDataModels.get(i).isNoEndWorkingTime(), isEndPosition);
+								leaveSum, false, leaveDataModels.get(i).isNoEndWorkingTime(), isEndPosition, isWeekDay);
 					}
 				} else {
-					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isNoEndWorkingTime, true);
+					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isNoEndWorkingTime, true, isWeekDay);
 					logPosition++;
 					currentCount++;
 				}
@@ -459,7 +459,7 @@ public class AutoMappingModel {
 		workingMinute = getWorkingMinute(startWorkingTime, endWorkingTime);
 		List<String> workTime = getHourTime(workingMinute * 60);
 		
-		if (isNoEndWorkingTime) {
+		if (!isWeekday && isNoEndWorkingTime) {
 			labelGroupId = new Label(0, logPosition, attendanceGroupId,getWorkingTimeNoEnoughExcelCellSetting(false));
 			labelGroupName = new Label(1, logPosition, attendanceGroupName,getWorkingTimeNoEnoughExcelCellSetting(false));
 			labelId = new Label(2, logPosition, attendanceId,getWorkingTimeNoEnoughExcelCellSetting(false));
@@ -541,13 +541,13 @@ public class AutoMappingModel {
 		} 
 	}
 	
-	private static void setLogExcelDataFromLeaveData(WritableSheet logSheet, int logPosition, String startTime, String endTime, String leaveCategory, String leaveCount, float leaveSum, boolean isNullData, boolean isNoEndWorkingTime, boolean isWorkingTimeNotEnough) {
+	private static void setLogExcelDataFromLeaveData(WritableSheet logSheet, int logPosition, String startTime, String endTime, String leaveCategory, String leaveCount, float leaveSum, boolean isNullData, boolean isNoEndWorkingTime, boolean isWorkingTimeNotEnough, boolean isWeekDay) {
 		Label labelLeaveStatus = null;
 		Label labelLeaveCategory = null;
 		Label labelLeaveCount = null;
 		Label labelLeaveSum = null;
 		
-		if (isNoEndWorkingTime) {
+		if (!isWeekDay && isNoEndWorkingTime) {
 			if (isNullData) {
 				labelLeaveStatus = new Label(12, logPosition, "" ,getWorkingTimeNoEnoughExcelCellSetting(false));
 				labelLeaveCategory = new Label(13, logPosition, "",getWorkingTimeNoEnoughExcelCellSetting(false));
