@@ -47,6 +47,9 @@ public class AutoMappingModel {
 	final static String DIALOG_HEADER_SUCCESS = "完成";
 	final static String DIALOG_HEADER_ERROR = "失敗";
 	
+	// Label Tag
+	final static String EXCEL_CELL_TITLE = "Title";
+	
 	private String attendancePath;
 	private String leavePath;
 	private String logPath;
@@ -74,14 +77,16 @@ public class AutoMappingModel {
 	private String weekdayPath;		// Excel 休假日期 路徑
 	
 	private long workingMinute = 0;
-	private int logPosition = 1;
+	private int logPosition = 0;
 	private int oldCountPosition = 2;
 	
 	private boolean isWeekDay = false;
-	private boolean isNoEndWorkingTime = false;
+	private boolean isErrorWorkingTime = false;
 	private boolean isIncludeNoonTime = false;
 	
 	private Sheet fillAttendanceRecordSheet = null;
+	
+	private List<WorkDataModel> workDataModelArrayList = new ArrayList<>();
 	
 	public AutoMappingModel() {
 		
@@ -121,10 +126,14 @@ public class AutoMappingModel {
 			for (int position = 1; position < attendanceSheetSize; position++) {
 				loadAttendenceDataFromExcel(attendanceSheet, position);		// 讀取門禁資料
 				
-				if (!startWorkingTime.equals("") && endWorkingTime.length() < 3) {
-					isNoEndWorkingTime = true;
+				if (startWorkingTime.length() < 3 && endWorkingTime.length() < 3  && complexWorkingTime.equals("")) {
+					isErrorWorkingTime = true;
 				} else {
-					isNoEndWorkingTime = false;
+					if (!startWorkingTime.equals("") && endWorkingTime.length() < 3) {
+						isErrorWorkingTime = true;
+					} else {
+						isErrorWorkingTime = false;
+					}
 				}
 				
 				if (currentId == null) {
@@ -146,7 +155,7 @@ public class AutoMappingModel {
 					}
 				}
 				
-				setLogExcelData(logSheet, logPosition, isWeekDay, isNoEndWorkingTime);
+				setLogExcelData(logSheet, logPosition, isWeekDay, isErrorWorkingTime);
 				
 				List<LeaveDataModel> leaveDataModels = new ArrayList();
 				
@@ -162,7 +171,10 @@ public class AutoMappingModel {
 							LeaveDataModel leaveDataModel = new LeaveDataModel();
 							
 							leaveDataModel.setPosition(logPosition);
-							leaveDataModel.isNoEndWorkingTime(isNoEndWorkingTime);
+							
+							
+							
+							leaveDataModel.isNoEndWorkingTime(isErrorWorkingTime);
 							
 							String leaveCategory = leaveSheet.getCell(4,search).getContents();
 							String leaveCount = leaveSheet.getCell(10,search).getContents();
@@ -189,7 +201,7 @@ public class AutoMappingModel {
 						
 							leaveDataModels.add(leaveDataModel);
 							
-							setLogExcelData(logSheet, logPosition, isWeekDay, isNoEndWorkingTime);
+							setLogExcelData(logSheet, logPosition, isWeekDay, isErrorWorkingTime);
 							logPosition++;
 						}
 					}
@@ -206,12 +218,20 @@ public class AutoMappingModel {
 						}
 						leaveSum += Float.parseFloat(leaveDataModels.get(i).getCount()) * 60;
 						
+						if (leaveDataModels.get(i).isNoEndWorkingTime()) {
+							if (leaveSum == 0) {
+								leaveDataModels.get(i).isNoEndWorkingTime(true);
+							} else {
+								leaveDataModels.get(i).isNoEndWorkingTime(false);
+							}
+						}
+						
 						setLogExcelDataFromLeaveData(logSheet, leaveDataModels.get(i).getPosition(), leaveDataModels.get(i).getStartTime(),
 								leaveDataModels.get(i).getEndTime(),leaveDataModels.get(i).getCategory(),leaveDataModels.get(i).getCount(), 
 								leaveSum, false, leaveDataModels.get(i).isNoEndWorkingTime(), isEndPosition, isWeekDay);
 					}
 				} else {
-					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isNoEndWorkingTime, true, isWeekDay);
+					setLogExcelDataFromLeaveData(logSheet, logPosition, null, null, null, null, 0, true, isErrorWorkingTime, true, isWeekDay);
 					logPosition++;
 				}
 			}
@@ -373,7 +393,7 @@ public class AutoMappingModel {
 			
 			currentId = attendanceId;
 			currentName = attendanceName;
-			isNoEndWorkingTime = false;
+			isErrorWorkingTime = false;
 			
 			oldCountPosition = logPosition + 1;
 		}
@@ -402,62 +422,92 @@ public class AutoMappingModel {
 	 * 19 刷卡紀錄
 	 * 20 班別名稱
 	 */
-	private static WritableSheet initLogExcel(WritableWorkbook logBook, String logSheetName) {
+	private WritableSheet initLogExcel(WritableWorkbook logBook, String logSheetName) {
 		WritableSheet logSheet = null;
-		try {
-			logSheet = logBook.createSheet(logSheetName, 0);
-			
-			// 初始Title設定
-			Label label101 = new Label(0, 0, "組織代碼",getLogExcelTitleCellSetting());
-			Label label102 = new Label(1, 0, "組織",getLogExcelTitleCellSetting());
-			Label label103 = new Label(2, 0, "員編",getLogExcelTitleCellSetting());
-			Label label104 = new Label(3, 0, "姓名",getLogExcelTitleCellSetting());
-			Label label105 = new Label(4, 0, "日期",getLogExcelTitleCellSetting());
-			Label label106 = new Label(5, 0, "第一次刷卡",getLogExcelTitleCellSetting());
-			Label label107 = new Label(6, 0, "最後一次刷卡",getLogExcelTitleCellSetting());
-			Label label108 = new Label(7, 0, "總工時(分鐘)",getLogExcelTitleCellSetting());
-			Label label1091 = new Label(8, 0, "工時(時)",getLogExcelTitleCellSetting());
-			Label label1092 = new Label(9, 0, "工時(分)",getLogExcelTitleCellSetting());
-			Label label110 = new Label(10, 0, "遲到總時長",getLogExcelTitleCellSetting());
-			Label label111 = new Label(11, 0, "早退總時長",getLogExcelTitleCellSetting());
-			Label label112 = new Label(12, 0, "請假狀況",getLogExcelTitleCellSetting());
-			Label label113 = new Label(13, 0, "假別",getLogExcelTitleCellSetting());
-			Label label114 = new Label(14, 0, "時數",getLogExcelTitleCellSetting());
-			Label label115 = new Label(15, 0, "加總",getLogExcelTitleCellSetting());
-			Label label116 = new Label(16, 0, "綜合工時",getLogExcelTitleCellSetting());
-			Label label117 = new Label(17, 0, "加班類別/時數",getLogExcelTitleCellSetting());
-			Label label118 = new Label(18, 0, "津貼類別/時數",getLogExcelTitleCellSetting());
-			Label label119 = new Label(19, 0, "刷卡紀錄",getLogExcelTitleCellSetting());
-			Label label120 = new Label(20, 0, "班別名稱",getLogExcelTitleCellSetting());
-			
-			logSheet.addCell(label101);
-			logSheet.addCell(label102); 
-			logSheet.addCell(label103); 
-			logSheet.addCell(label104); 
-			logSheet.addCell(label105); 
-			logSheet.addCell(label106); 
-			logSheet.addCell(label107); 
-			logSheet.addCell(label108); 
-			logSheet.addCell(label1091); 
-			logSheet.addCell(label1092); 
-			logSheet.addCell(label110); 
-			logSheet.addCell(label111); 
-			logSheet.addCell(label112); 
-			logSheet.addCell(label113); 
-			logSheet.addCell(label114); 
-			logSheet.addCell(label115); 
-			logSheet.addCell(label116); 
-			logSheet.addCell(label117); 
-			logSheet.addCell(label118); 
-			logSheet.addCell(label119); 
-			logSheet.addCell(label120);
-		} catch (RowsExceededException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (WriteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		logSheet = logBook.createSheet(logSheetName, 0);
+		
+		// 初始Title設定
+//			Label label101 = new Label(0, 0, "組織代碼",getLogExcelTitleCellSetting());
+//			Label label102 = new Label(1, 0, "組織",getLogExcelTitleCellSetting());
+//			Label label103 = new Label(2, 0, "員編",getLogExcelTitleCellSetting());
+//			Label label104 = new Label(3, 0, "姓名",getLogExcelTitleCellSetting());
+//			Label label105 = new Label(4, 0, "日期",getLogExcelTitleCellSetting());
+//			Label label106 = new Label(5, 0, "第一次刷卡",getLogExcelTitleCellSetting());
+//			Label label107 = new Label(6, 0, "最後一次刷卡",getLogExcelTitleCellSetting());
+//			Label label108 = new Label(7, 0, "總工時(分鐘)",getLogExcelTitleCellSetting());
+//			Label label1091 = new Label(8, 0, "工時(時)",getLogExcelTitleCellSetting());
+//			Label label1092 = new Label(9, 0, "工時(分)",getLogExcelTitleCellSetting());
+//			Label label110 = new Label(10, 0, "遲到總時長",getLogExcelTitleCellSetting());
+//			Label label111 = new Label(11, 0, "早退總時長",getLogExcelTitleCellSetting());
+//			Label label112 = new Label(12, 0, "請假狀況",getLogExcelTitleCellSetting());
+//			Label label113 = new Label(13, 0, "假別",getLogExcelTitleCellSetting());
+//			Label label114 = new Label(14, 0, "時數",getLogExcelTitleCellSetting());
+//			Label label115 = new Label(15, 0, "加總",getLogExcelTitleCellSetting());
+//			Label label116 = new Label(16, 0, "綜合工時",getLogExcelTitleCellSetting());
+//			Label label117 = new Label(17, 0, "加班類別/時數",getLogExcelTitleCellSetting());
+//			Label label118 = new Label(18, 0, "津貼類別/時數",getLogExcelTitleCellSetting());
+//			Label label119 = new Label(19, 0, "刷卡紀錄",getLogExcelTitleCellSetting());
+//			Label label120 = new Label(20, 0, "班別名稱",getLogExcelTitleCellSetting());
+//			
+//			logSheet.addCell(label101);
+//			logSheet.addCell(label102); 
+//			logSheet.addCell(label103); 
+//			logSheet.addCell(label104); 
+//			logSheet.addCell(label105); 
+//			logSheet.addCell(label106); 
+//			logSheet.addCell(label107); 
+//			logSheet.addCell(label108); 
+//			logSheet.addCell(label1091); 
+//			logSheet.addCell(label1092); 
+//			logSheet.addCell(label110); 
+//			logSheet.addCell(label111); 
+//			logSheet.addCell(label112); 
+//			logSheet.addCell(label113); 
+//			logSheet.addCell(label114); 
+//			logSheet.addCell(label115); 
+//			logSheet.addCell(label116); 
+//			logSheet.addCell(label117); 
+//			logSheet.addCell(label118); 
+//			logSheet.addCell(label119); 
+//			logSheet.addCell(label120);
+		
+		WorkDataModel workDataModel = new WorkDataModel();
+		
+		workDataModel.setAttendanceGroupId("組織代碼");
+		workDataModel.setAttendanceGroupName("組織");
+		workDataModel.setAttendanceId("員編");
+		workDataModel.setAttendanceName("姓名");
+		workDataModel.setAttendanceDate("日期");
+		workDataModel.setStartWorkingTime("第一次刷卡");
+		workDataModel.setEndWorkingTime("最後一次刷卡");
+		//
+		workDataModel.setWorkingMinute("總工時(分鐘)");		
+		workDataModel.setWorkingHours("工時(時)");		
+		workDataModel.setWorkingMin("工時(分)");		
+		//
+		workDataModel.setLateTotalTime("遲到總時長");	
+		workDataModel.setLeaveEarlyTotalTime("早退總時長");
+		//
+		List<LeaveDataModel> leaveDataModelArrayList = new ArrayList<>();
+		LeaveDataModel leaveDataModel = new LeaveDataModel();
+		leaveDataModel.setCategory("請假狀況");
+		leaveDataModel.setCount("假別");
+		leaveDataModel.setStartTime("時數");
+		leaveDataModel.setEndTime("加總");
+		
+		workDataModel.setLeaveData(leaveDataModelArrayList);	
+		//
+		workDataModel.setComplexWorkingTime("綜合工時");
+		workDataModel.setOvertimeCategory("加班類別/時數");
+		workDataModel.setAllowanceCategory("津貼類別/時數");
+		workDataModel.setBookingRecord("刷卡紀錄");
+		workDataModel.setWorkingItem("班別名稱");
+
+		workDataModel.setLabelAttribute(EXCEL_CELL_TITLE);
+		
+		workDataModelArrayList.add(workDataModel);
+		
+		logPosition++;
 		
 		return logSheet;
 	}

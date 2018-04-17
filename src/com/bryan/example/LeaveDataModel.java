@@ -2,11 +2,14 @@ package com.bryan.example;
 
 public class LeaveDataModel {
 	int position;
+	
 	String category;
 	String count;
-	boolean isNoEndWorkingTime;
 	String startTime;
 	String endTime;
+	
+	boolean isNoEndWorkingTime;
+	String labelAttribute;
 	
 	public LeaveDataModel() {
 		
