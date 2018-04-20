@@ -49,6 +49,12 @@ public class AutoMappingModel {
 	
 	// Label Tag
 	final static String EXCEL_CELL_TITLE = "Title";
+	final static String EXCEL_CELL_HOLIDAY = "Holiday";		// 假日
+	final static String EXCEL_CELL_DEFAULT = "Default";		// 預設
+	final static String EXCEL_CELL_NOT_ENOUGH_WORK_TIME = "NotEnoughWorkTime";		// 上班時數不足
+	final static String EXCEL_CELL_IS_ABSENTEEISM = "IsAbsenteeism";		// 曠職
+	final static String EXCEL_CELL_NO_OF_DUTY_RECORD = "NoOffDutyRecord";		// 沒有下班卡紀錄
+	final static String EXCEL_CELL_ERROR_USER = "ErrorUser";		//	異常員工
 	
 	private String attendancePath;
 	private String leavePath;
@@ -74,7 +80,7 @@ public class AutoMappingModel {
 	private String currentId = null;
 	private String currentName = null;
 	private String path = "";	// 目前檔案路徑
-	private String weekdayPath;		// Excel 休假日期 路徑
+//	private String holidayPath;		// Excel 休假日期 路徑
 	
 	private long workingMinute = 0;
 	private int logPosition = 0;
@@ -94,8 +100,6 @@ public class AutoMappingModel {
 	
 	public void run() {
 		List<WorkDataModel> workDataModelArrayList = new ArrayList<>();
-		
-		loadWeekdayExcelData();
 		
 		try {
 			Workbook workbook = Workbook.getWorkbook(new File(attendancePath));
@@ -274,7 +278,7 @@ public class AutoMappingModel {
 		}
 	}
 	
-	private void loadWeekdayExcelData() {
+	private String loadHolidayExcelData() {
 		File directory = new File(".");//设定为当前文件夹
 		//System.out.println(directory.getCanonicalPath());//获取标准的路径
 		//System.out.println(directory.getAbsolutePath());//获取绝对路径
@@ -285,8 +289,9 @@ public class AutoMappingModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+		String holidayPath = path+"107ygov_yfyshop_weekday.xls";
 		
-		weekdayPath = path+"107ygov_yfyshop_weekday.xls";
+		return holidayPath;
 	}
 	
 	/**
@@ -549,37 +554,49 @@ public class AutoMappingModel {
 //	}
 	
 	private void setLogExcelData(WritableSheet logSheet, List<WorkDataModel> dataArrayList) {
-		Label labelGroupId;
-		Label labelGroupName;
-		Label labelId;
-		Label labelName;
-		Label labelDate;
-		Label labelStartWorkingTime;
-		Label labelendWorkingTime;
-		Label labelWorkingMinute;
-		Label labelWorkingHours;
-		Label labelWorkingMin;
-		Label labelLateTotalTime;
-		Label labelLeaveEarlyTotalTime;
-		Label labelLeaveStatus;
-		Label labelLeaveCategory;
-		Label labelLeaveCount;
-		Label labelLeaveSum;
-		Label labelComplexWorkingTime;
-		Label labelOvertimeCategory;
-		Label labelAllowanceCategory;
-		Label labelBookingRecord;
-		Label labelWorkingItem;
+//		Label labelGroupId;
+//		Label labelGroupName;
+//		Label labelId;
+//		Label labelName;
+//		Label labelDate;
+//		Label labelStartWorkingTime;
+//		Label labelendWorkingTime;
+//		Label labelWorkingMinute;
+//		Label labelWorkingHours;
+//		Label labelWorkingMin;
+//		Label labelLateTotalTime;
+//		Label labelLeaveEarlyTotalTime;
+//		Label labelLeaveStatus;
+//		Label labelLeaveCategory;
+//		Label labelLeaveCount;
+//		Label labelLeaveSum;
+//		Label labelComplexWorkingTime;
+//		Label labelOvertimeCategory;
+//		Label labelAllowanceCategory;
+//		Label labelBookingRecord;
+//		Label labelWorkingItem;
 		
 		int logSheetPosition = 0;
-		String currentId;
-		String currentName;
+//		String currentId;
+//		String currentName;
 		
 		// 讀取假日資料Excel
-		Workbook weekdayBook = Workbook.getWorkbook(new File(weekdayPath));
-		Sheet weekdaySheet = weekdayBook.getSheet(0);
-		int weekdaySheetSize = weekdaySheet.getRows();	
-		
+		String holidayPath = loadHolidayExcelData();
+		Workbook holidaydayBook = null;
+		Sheet holidaySheet = null;
+		int holidaySheetSize = 0;
+		try {
+			holidaydayBook = Workbook.getWorkbook(new File(holidayPath));
+			holidaySheet = holidaydayBook.getSheet(0);
+			holidaySheetSize = holidaySheet.getRows();	
+		} catch (BiffException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	
 		// 設定title
 		setTitle(logSheet);
 		
@@ -588,90 +605,99 @@ public class AutoMappingModel {
 //			currentName = dataArrayList.get(i).getAttendanceName();
 //			
 //			checkSearchEnd(logSheet, oldCountPosition);
-			logSheetPosition = i;
+			logSheetPosition++;
 			
 			// 檢查是否在假日
-			String weekday;
-			isWeekDay = false;
-			for (int weekdayPosition = 1; weekdayPosition < weekdaySheetSize; weekdayPosition++) {
-				weekday = weekdaySheet.getCell(0, weekdayPosition).getContents();
+			String holiday;
+			boolean isHoliday = false;
+			for (int weekdayPosition = 1; weekdayPosition < holidaySheetSize; weekdayPosition++) {
+				holiday = holidaySheet.getCell(0, weekdayPosition).getContents();
 //				System.out.println("week day : " + weekday);
-				if (dataArrayList.get(i).getAttendanceDate().equals(weekday)) {
-					isWeekDay = true;
+				if (dataArrayList.get(i).getAttendanceDate().equals(holiday)) {
+					isHoliday = true;
 					break;
 				}
 			}
 			
-			if (!isWeekDay) {
-				
-			} else {
-				setMainData(logSheet, dataArrayList.get(i), WritableCellFormat excelCellFormat, logSheetPosition);
-			}
-			
-			WritableCellFormat excelCellSetting = getExcelCellSetting(dataArrayList.get(i).getLabelAttribute());
-			
-			labelGroupId = new Label(0, i, dataArrayList.get(i).getAttendanceGroupId(), excelCellSetting);
-			labelGroupName = new Label(1, i, dataArrayList.get(i).getAttendanceGroupName(), excelCellSetting);
-			labelId = new Label(2, i, dataArrayList.get(i).getAttendanceId(), excelCellSetting);
-			labelName = new Label(3, i, dataArrayList.get(i).getAttendanceName(), excelCellSetting);
-			labelDate = new Label(4, i, dataArrayList.get(i).getAttendanceDate(), excelCellSetting);	
-			
-			labelLateTotalTime = new Label(10, i, dataArrayList.get(i).getLateTotalTime(),excelCellSetting);
-			labelLeaveEarlyTotalTime = new Label(11, i, dataArrayList.get(i).getLeaveEarlyTotalTime(),excelCellSetting);
-			
-			labelComplexWorkingTime = new Label(16, i, dataArrayList.get(i).getComplexWorkingTime(),excelCellSetting);
-			labelOvertimeCategory = new Label(17, i, dataArrayList.get(i).getOvertimeCategory(),excelCellSetting);
-			labelAllowanceCategory = new Label(18, i, dataArrayList.get(i).getAllowanceCategory(),excelCellSetting);
-			labelBookingRecord = new Label(19, i, dataArrayList.get(i).getBookingRecord(),excelCellSetting);
-			labelWorkingItem = new Label(20, i, dataArrayList.get(i).getWorkingItem(),excelCellSetting);
-			
-			if (i == 0) {
-				labelStartWorkingTime = new Label(5, i, dataArrayList.get(i).getStartWorkingTime(),excelCellSetting);
-				labelendWorkingTime = new Label(6, i, dataArrayList.get(i).getEndWorkingTime(),excelCellSetting);
-				labelWorkingMinute = new Label(7, i, dataArrayList.get(i).getWorkingMinute(),excelCellSetting);
-				labelWorkingHours = new Label(8, i, dataArrayList.get(i).getWorkingHours(),excelCellSetting);
-				labelWorkingMin = new Label(9, i, dataArrayList.get(i).getWorkingMin(),excelCellSetting);
-			} else {
-				String startWorkingTime = dataArrayList.get(i).getStartWorkingTime();
-				String endWorkingTime = dataArrayList.get(i).getEndWorkingTime();
-				
-				long workingMinute = getWorkingMinute(startWorkingTime, endWorkingTime);
-				List<String> workTime = getHourTime(workingMinute * 60);
-				
-				labelStartWorkingTime = new Label(5, i, fromatDate(startWorkingTime, "HH:mm:ss"),excelCellSetting);
-				labelendWorkingTime = new Label(6, i, fromatDate(endWorkingTime, "HH:mm:ss"),excelCellSetting);
-				labelWorkingMinute = new Label(7, i, String.valueOf(workingMinute),excelCellSetting);
-				labelWorkingHours = new Label(8, i, workTime.get(0),excelCellSetting);
-				labelWorkingMin = new Label(9, i, workTime.get(1),excelCellSetting);
-				
+			if (!isHoliday) {
 				List<LeaveDataModel> leaveDataArrayList = dataArrayList.get(i).getLeaveData();
-				float leaveSum = workingMinute;
+				float leaveSum = getWorkingMinute(dataArrayList.get(i).getStartWorkingTime(), dataArrayList.get(i).getEndWorkingTime());
 				for(int x = 0; x <leaveDataArrayList.size(); x++ ) {
-//						// 鎖定最後一筆才顯示加總不足提示
-//						boolean isEndPosition = false;
-//						if (i == leaveDataModels.size() - 1) {
-//							isEndPosition = true;	
-////							System.out.println("leave Sum : " + leaveSum);
-//						}
-					leaveSum += Float.parseFloat(leaveDataArrayList.get(i).getCount()) * 60;
-						
-					String startTime = leaveDataArrayList.get(x).getStartTime();
-					String endTime = leaveDataArrayList.get(x).getEndTime();
+					String excelCellTag = null;
 					
-					if (startTime != null && endTime != null) {
-						labelLeaveStatus = new Label(12, logSheetPosition, startTime + "-" + endTime,excelCellSetting);
+					// 鎖定最後一筆才顯示加總不足提示
+					if (i == leaveDataArrayList.size() - 1) {
+						
 					}
-					labelLeaveCategory = new Label(13, logSheetPosition, leaveDataArrayList.get(x).getCategory(),excelCellSetting);
-					labelLeaveCount = new Label(14, logSheetPosition, leaveDataArrayList.get(x).getCount(),excelCellSetting);
-					if (leaveSum > 0) {
-						labelLeaveSum = new Label(15, logSheetPosition, String.valueOf(leaveSum / 60),excelCellSetting);
-					}
+					leaveSum += Float.parseFloat(leaveDataArrayList.get(i).getCount()) * 60;
+					setLeaveData(logSheet, leaveDataArrayList.get(x), leaveSum, excelCellTag, logSheetPosition);
 					
 					logSheetPosition++;
 				}
+			} else {
+				setMainData(logSheet, dataArrayList.get(i), EXCEL_CELL_HOLIDAY, logSheetPosition);
 			}
 			
-			weekdayBook.close();
+//			WritableCellFormat excelCellSetting = getExcelCellSetting(dataArrayList.get(i).getLabelAttribute());
+			
+//			labelGroupId = new Label(0, i, dataArrayList.get(i).getAttendanceGroupId(), excelCellSetting);
+//			labelGroupName = new Label(1, i, dataArrayList.get(i).getAttendanceGroupName(), excelCellSetting);
+//			labelId = new Label(2, i, dataArrayList.get(i).getAttendanceId(), excelCellSetting);
+//			labelName = new Label(3, i, dataArrayList.get(i).getAttendanceName(), excelCellSetting);
+//			labelDate = new Label(4, i, dataArrayList.get(i).getAttendanceDate(), excelCellSetting);	
+//			
+//			labelLateTotalTime = new Label(10, i, dataArrayList.get(i).getLateTotalTime(),excelCellSetting);
+//			labelLeaveEarlyTotalTime = new Label(11, i, dataArrayList.get(i).getLeaveEarlyTotalTime(),excelCellSetting);
+//			
+//			labelComplexWorkingTime = new Label(16, i, dataArrayList.get(i).getComplexWorkingTime(),excelCellSetting);
+//			labelOvertimeCategory = new Label(17, i, dataArrayList.get(i).getOvertimeCategory(),excelCellSetting);
+//			labelAllowanceCategory = new Label(18, i, dataArrayList.get(i).getAllowanceCategory(),excelCellSetting);
+//			labelBookingRecord = new Label(19, i, dataArrayList.get(i).getBookingRecord(),excelCellSetting);
+//			labelWorkingItem = new Label(20, i, dataArrayList.get(i).getWorkingItem(),excelCellSetting);
+//			
+//				String startWorkingTime = dataArrayList.get(i).getStartWorkingTime();
+//				String endWorkingTime = dataArrayList.get(i).getEndWorkingTime();
+//				
+//				long workingMinute = getWorkingMinute(startWorkingTime, endWorkingTime);
+//				List<String> workTime = getHourTime(workingMinute * 60);
+//				
+//				labelStartWorkingTime = new Label(5, i, fromatDate(startWorkingTime, "HH:mm:ss"),excelCellSetting);
+//				labelendWorkingTime = new Label(6, i, fromatDate(endWorkingTime, "HH:mm:ss"),excelCellSetting);
+//				labelWorkingMinute = new Label(7, i, String.valueOf(workingMinute),excelCellSetting);
+//				labelWorkingHours = new Label(8, i, workTime.get(0),excelCellSetting);
+//				labelWorkingMin = new Label(9, i, workTime.get(1),excelCellSetting);
+				
+//				List<LeaveDataModel> leaveDataArrayList = dataArrayList.get(i).getLeaveData();
+//				float leaveSum = getWorkingMinute(dataArrayList.get(i).getStartWorkingTime(), dataArrayList.get(i).getEndWorkingTime());
+//				for(int x = 0; x <leaveDataArrayList.size(); x++ ) {
+//					String excelCellTag = null;
+//					
+//					// 鎖定最後一筆才顯示加總不足提示
+//					if (i == leaveDataArrayList.size() - 1) {
+//						
+//					}
+//					leaveSum += Float.parseFloat(leaveDataArrayList.get(i).getCount()) * 60;
+//						
+////					String startTime = leaveDataArrayList.get(x).getStartTime();
+////					String endTime = leaveDataArrayList.get(x).getEndTime();
+////					
+////					if (startTime != null && endTime != null) {
+////						labelLeaveStatus = new Label(12, logSheetPosition, startTime + "-" + endTime,excelCellSetting);
+////					}
+////					labelLeaveCategory = new Label(13, logSheetPosition, leaveDataArrayList.get(x).getCategory(),excelCellSetting);
+////					labelLeaveCount = new Label(14, logSheetPosition, leaveDataArrayList.get(x).getCount(),excelCellSetting);
+////					if (leaveSum > 0) {
+////						labelLeaveSum = new Label(15, logSheetPosition, String.valueOf(leaveSum / 60),excelCellSetting);
+////					}
+//					
+//					setLeaveData(logSheet, leaveDataArrayList.get(x), leaveSum, excelCellTag, logSheetPosition);
+//					
+//					logSheetPosition++;
+//				}
+			}
+			
+		if (holidaydayBook != null) {
+			holidaydayBook.close();
 		}
 		
 		
@@ -730,32 +756,6 @@ public class AutoMappingModel {
 //			labelBookingRecord = new Label(19, logPosition, bookingRecord);
 //			labelWorkingItem = new Label(20, logPosition, workingItem);
 //		}
-		
-		try {
-			logSheet.addCell(labelGroupId);
-			logSheet.addCell(labelGroupName); 
-			logSheet.addCell(labelId); 
-			logSheet.addCell(labelName); 
-			logSheet.addCell(labelStartWorkingTime); 
-			logSheet.addCell(labelendWorkingTime); 
-			logSheet.addCell(labelLateTotalTime); 
-			logSheet.addCell(labelWorkingMinute); 
-			logSheet.addCell(labelWorkingHours);
-			logSheet.addCell(labelWorkingMin);
-			logSheet.addCell(labelLeaveEarlyTotalTime); 
-			logSheet.addCell(labelComplexWorkingTime); 
-			logSheet.addCell(labelOvertimeCategory); 
-			logSheet.addCell(labelAllowanceCategory); 
-			logSheet.addCell(labelBookingRecord); 
-			logSheet.addCell(labelWorkingItem); 
-			logSheet.addCell(labelDate);
-		} catch (RowsExceededException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (WriteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
 	}
 	
 	private void setTitle(WritableSheet logSheet) {
@@ -811,12 +811,31 @@ public class AutoMappingModel {
 			e.printStackTrace();
 		} 
 	}
-	private void setMainData(WritableSheet logSheet, WorkDataModel data, WritableCellFormat excelCellFormat, int position) {
+	
+	private void setMainData(WritableSheet logSheet, WorkDataModel data, String excelCellTag, int position) {
+		WritableCellFormat excelCellFormat = null;
+		
+//		switch (excelCellTag) {
+//		case 
+//			
+//		}
 		Label labelGroupId = new Label(0, position, data.getAttendanceGroupId(), excelCellFormat);
 		Label labelGroupName = new Label(1, position, data.getAttendanceGroupName(), excelCellFormat);
 		Label labelId = new Label(2, position, data.getAttendanceId(), excelCellFormat);
 		Label labelName = new Label(3, position, data.getAttendanceName(), excelCellFormat);
 		Label labelDate = new Label(4, position, data.getAttendanceDate(), excelCellFormat);	
+		
+		String startWorkingTime = data.getStartWorkingTime();
+		String endWorkingTime = data.getEndWorkingTime();
+		
+		long workingMinute = getWorkingMinute(startWorkingTime, endWorkingTime);
+		List<String> workTime = getHourTime(workingMinute * 60);
+		
+		Label labelStartWorkingTime = new Label(5, position, fromatDate(startWorkingTime, "HH:mm:ss"),excelCellFormat);
+		Label labelendWorkingTime = new Label(6, position, fromatDate(endWorkingTime, "HH:mm:ss"),excelCellFormat);
+		Label labelWorkingMinute = new Label(7, position, String.valueOf(workingMinute),excelCellFormat);
+		Label labelWorkingHours = new Label(8, position, workTime.get(0),excelCellFormat);
+		Label labelWorkingMin = new Label(9, position, workTime.get(1),excelCellFormat);
 		
 		Label labelLateTotalTime = new Label(10, position, data.getLateTotalTime(),excelCellFormat);
 		Label labelLeaveEarlyTotalTime = new Label(11, position, data.getLeaveEarlyTotalTime(),excelCellFormat);
@@ -832,6 +851,12 @@ public class AutoMappingModel {
 			logSheet.addCell(labelGroupName); 
 			logSheet.addCell(labelId); 
 			logSheet.addCell(labelName); 
+			logSheet.addCell(labelDate);
+			logSheet.addCell(labelStartWorkingTime); 
+			logSheet.addCell(labelendWorkingTime); 
+			logSheet.addCell(labelWorkingMinute); 
+			logSheet.addCell(labelWorkingHours); 
+			logSheet.addCell(labelWorkingMin);
 			logSheet.addCell(labelLateTotalTime); 
 			logSheet.addCell(labelLeaveEarlyTotalTime); 
 			logSheet.addCell(labelComplexWorkingTime); 
@@ -847,6 +872,67 @@ public class AutoMappingModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
+	}
+	
+	private void setLeaveData(WritableSheet logSheet, LeaveDataModel data, float leaveSum, String excelCellTag, int position) {
+		WritableCellFormat excelCellFormat = null;
+		
+//		switch (excelCellTag) {
+//		case 
+//			
+//		}
+		
+		String startTime = data.getStartTime();
+		String endTime = data.getEndTime();
+		
+		Label labelLeaveStatus = null;
+		if (startTime != null && endTime != null) {
+			labelLeaveStatus = new Label(12, position, startTime + "-" + endTime,excelCellFormat);
+		}
+		Label labelLeaveCategory = new Label(13, position, data.getCategory(),excelCellFormat);
+		Label labelLeaveCount = new Label(14, position, data.getCount(),excelCellFormat);
+		Label labelLeaveSum = null;
+		if (leaveSum > 0) {
+			labelLeaveSum = new Label(15, position, String.valueOf(leaveSum / 60),excelCellFormat);
+		}
+		
+		try {
+			if (labelLeaveStatus != null) {
+				logSheet.addCell(labelLeaveStatus);
+			}
+			logSheet.addCell(labelLeaveCategory); 
+			logSheet.addCell(labelLeaveCount); 
+			if (labelLeaveSum != null) {
+				logSheet.addCell(labelLeaveSum);
+			}
+		} catch (RowsExceededException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WriteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	private WritableCellFormat getExcelCellFormat(String excelCellTag) {
+		WritableCellFormat excelCellFormat = null;
+		
+		switch (excelCellTag) {
+		case EXCEL_CELL_HOLIDAY:
+			return excelCellFormat;
+		case EXCEL_CELL_DEFAULT:
+			return excelCellFormat;
+		case EXCEL_CELL_NOT_ENOUGH_WORK_TIME:
+			return getWorkingTimeNoEnoughExcelCellSetting(false);	
+		case EXCEL_CELL_IS_ABSENTEEISM:
+			return excelCellFormat;	
+		case EXCEL_CELL_NO_OF_DUTY_RECORD:
+			return excelCellFormat;
+		case EXCEL_CELL_ERROR_USER:
+			return excelCellFormat;
+		default:
+			return excelCellFormat;
+		}
 	}
 	
 	private static void setLogExcelDataFromLeaveData(WritableSheet logSheet, int logPosition, String startTime, String endTime, String leaveCategory, String leaveCount, float leaveSum, boolean isNullData, boolean isNoEndWorkingTime, boolean isWorkingTimeNotEnough, boolean isWeekDay) {
