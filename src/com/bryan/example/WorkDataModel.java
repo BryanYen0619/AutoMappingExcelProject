@@ -30,7 +30,7 @@ public class WorkDataModel {
     private String bookingRecord;
     private String workingItem;
 
-    private String labelAttribute;
+    private List<String> labelAttribute;
 
     public int getPosition() {
         return position;
@@ -88,7 +88,7 @@ public class WorkDataModel {
         return bookingRecord;
     }
 
-    public String getLabelAttribute() {
+    public List<String> getLabelAttribute() {
         return labelAttribute;
     }
 
@@ -148,7 +148,7 @@ public class WorkDataModel {
         this.endWorkingTime = endWorkingTime;
     }
 
-    public void setLabelAttribute(String labelAttribute) {
+    public void setLabelAttribute(List<String> labelAttribute) {
         this.labelAttribute = labelAttribute;
     }
 
