@@ -380,7 +380,8 @@ public class AutoMappingModel {
 			List<LeaveDataModel> leaveDataArrayList = dataArrayList.get(i).getLeaveData();
 			
 			// 檢查是否目標使用者資料已結束
-			checkSearchEnd(logSheet, dataArrayList.get(i), oldCountPosition);
+			// 暫時關閉，預計更改成以每個月工時為基準，扣除異常天數後的總和工作天
+//			checkSearchEnd(logSheet, dataArrayList.get(i), oldCountPosition);
 		
 			List<String> labelAttribute = new ArrayList<>();
 			
